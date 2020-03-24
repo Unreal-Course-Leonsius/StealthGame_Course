@@ -89,6 +89,7 @@ void AFPSAIGuard::ResetOrientation()
 		return;
 
 	//SetActorRotation(OriginalRotation);
+
 	SetAIState(EAIState::Idle, OriginalRotation);
 }
 
