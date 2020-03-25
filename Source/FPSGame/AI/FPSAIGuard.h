@@ -50,12 +50,24 @@ protected:
 	UFUNCTION()
 	void ResetOrientation();
 
-	void SetAIState(EAIState State, FRotator LookAt);
-
-public:
-
+	void SetAIState(EAIState State);
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
-	void OnStateChanged(EAIState NewState, FRotator LookAt);
+	void OnStateChanged(EAIState NewState);
+
+	UFUNCTION()
+	void MoveNextPatrolPoint();
+
+protected:
+
+	/* Let the guard go on patrol */
+	UPROPERTY(EditInstanceOnly, Category = "AI")
+	bool bPatrol;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition = "bPatrol"))
+	TArray<AActor*> PatrolPoints;
+
+	// The Current point the actor is either moving to or standing at
+	AActor* CurrentPatrolPoint;
 
 public:	
 	// Called every frame
@@ -65,6 +77,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+
+	int32 PatrolIndex = 0;
+
+	AController* GuardController = nullptr;
+
+	bool bCanTick = true;
 
 	// for not calling multiple times CompleteMission() function 
 	// because it executed Dead Animation
