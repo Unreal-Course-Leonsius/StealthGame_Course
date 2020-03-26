@@ -36,6 +36,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UPawnNoiseEmitterComponent* NoiseEmitterComp;
+protected:
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
 
 public:
 	AFPSCharacter();
@@ -54,6 +58,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "GamePlay")
 	bool bIsCarryingObjective;
+
+public:
+
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	
