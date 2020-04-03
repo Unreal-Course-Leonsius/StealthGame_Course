@@ -50,7 +50,4 @@ void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPr
 		Destroy();
 	}
 
-
-	
-
 }

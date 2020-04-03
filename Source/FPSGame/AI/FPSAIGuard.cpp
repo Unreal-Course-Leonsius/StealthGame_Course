@@ -5,7 +5,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "AI/Navigation/NavigationSystem.h"
-#include "Net/UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"  // contains DOREPLIFETIME macro
+#include "Engine.h"
 
 #include "FPSGameMode.h"
 
@@ -24,6 +25,19 @@ AFPSAIGuard::AFPSAIGuard()
 
 	GuardState = EAIState::Idle;
 
+
+}
+
+void AFPSAIGuard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFPSAIGuard, GuardState);
+}
+
+
+void AFPSAIGuard::OnRep_GuardState()
+{
+	OnStateChanged(GuardState);
 }
 
 // Called when the game starts or when spawned
@@ -64,13 +78,41 @@ void AFPSAIGuard::Tick(float DeltaTime)
 		}
 	}
 
+	DrawDebugString(GetWorld(), FVector(0, 0, 100.f), GetEnumText(Role), this, FColor::Green, DeltaTime);
+
 }
 
-// Called to bind functionality to input
-void AFPSAIGuard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+FString AFPSAIGuard::GetEnumText(ENetRole Role)
+{
+	switch (Role)
+	{
+	case ROLE_None:
+		return "None";
+	case ROLE_SimulatedProxy:
+		return "SimulatedProxy";
+	case ROLE_AutonomousProxy:
+		return "AutonomousProxy";
+	case ROLE_Authority:
+		return "Authority";
+	default:
+		return "ERROR";
+	}
+}
+
+FString AFPSAIGuard::GetStateText(EAIState state)
+{
+	switch (state)
+	{
+	case EAIState::Idle:
+		return "Idle";
+	case EAIState::Suspisious:
+		return "Suspicious";
+	case EAIState::Alert:
+		return "Alert";
+	default:
+		return "Error";
+	}
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
@@ -132,6 +174,10 @@ void AFPSAIGuard::OnPawnHearing(APawn* NoiseInstigator, const FVector & Location
 	// Stop Movement if Patrolling
 	if (GuardController)
 		GuardController->StopMovement();
+
+
+	DrawDebugString(GetWorld(), FVector(400), GetEnumText(Role), this, FColor::Green, 5.f);
+
 }
 
 void AFPSAIGuard::ResetOrientation()
@@ -155,6 +201,23 @@ void AFPSAIGuard::SetAIState(EAIState State)
 	GuardState = State;
 
 	OnStateChanged(GuardState);
+	
+	UE_LOG(LogTemp, Error, TEXT("Both Server and Client"));
+	
+
+	/// Simulated Proxy don't executed
+	if (Role == ROLE_SimulatedProxy)
+	{
+		DrawDebugString(GetWorld(), FVector(200), GetStateText(GuardState), this, FColor::Green, 10.f);
+		UE_LOG(LogTemp, Warning, TEXT("Simulated Proxy = %s"), *GetStateText(GuardState));
+	}
+
+	if (Role == ROLE_Authority)
+	{
+		DrawDebugString(GetWorld(), FVector(200), GetStateText(GuardState), this, FColor::Green, 20.f);
+		UE_LOG(LogTemp, Warning, TEXT("Authority = %s"), *GetStateText(GuardState));
+	}
+
 }
 
 void AFPSAIGuard::MoveNextPatrolPoint()

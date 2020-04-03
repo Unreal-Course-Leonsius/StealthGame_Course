@@ -4,10 +4,14 @@
 #include "FPSHUD.h"
 #include "FPSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "FPSGameState.h"
+#include "FPSPlayerController.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/TargetPoint.h"
+
+
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -17,6 +21,17 @@ AFPSGameMode::AFPSGameMode()
 
 	// use our custom HUD class
 	HUDClass = AFPSHUD::StaticClass();
+
+	GameStateClass = AFPSGameState::StaticClass();
+}
+
+
+void AFPSGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay"));
+	//GameStateClass = AFPSGameState::StaticClass();
 }
 
 void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool bMissionSuccess)
@@ -25,17 +40,16 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool bMissionSuccess)
 	{
 		/// if check DisableInput() with buttons Alt + G two times
 		/// we can see it's parameter may be PlayerController or NULL
-		InstigatorPawn->DisableInput(nullptr);
+		//InstigatorPawn->DisableInput(nullptr); // we put it in GameState class
 
 		TArray<AActor*> BP_ClassArray;
 		UGameplayStatics::GetAllActorsOfClass(this, BlueprintClass, BP_ClassArray);
 
 
-
 		if (BP_ClassArray.Num() > 0)
 		{
 			NewViewTarget = BP_ClassArray[0];
-			UE_LOG(LogTemp, Warning, TEXT("BP_BlueprintArray Number = %i"), BP_ClassArray.Num());
+			//UE_LOG(LogTemp, Warning, TEXT("BP_BlueprintArray Number = %i"), BP_ClassArray.Num());
 
 		}
 
@@ -46,15 +60,37 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool bMissionSuccess)
 		////CameraLocation = GetWorld()->SpawnActor<ATargetPoint>(Location);
 		//NewViewTarget->SetActorLocation(FVector(-1250.000000, 680.000000, 1270.000000));
 		//NewViewTarget->SetActorRotation(FRotator(-27.199799, -32.999878, 0.000006));
-
-		APlayerController* PC = Cast<APlayerController>(InstigatorPawn->GetController());
-		if (PC && NewViewTarget)
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("TargetLocation = %s"), *CameraLocation->GetActorLocation().ToString());
-			PC->SetViewTargetWithBlend(NewViewTarget, 1.5f, EViewTargetBlendFunction::VTBlend_Cubic);
+			APlayerController* PC = It->Get();
+			if (PC && NewViewTarget)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("TargetLocation = %s"), *CameraLocation->GetActorLocation().ToString());
+				PC->SetViewTargetWithBlend(NewViewTarget, 1.5f, EViewTargetBlendFunction::VTBlend_Cubic);
+			}
 		}
+
+		//APlayerController* PC = Cast<APlayerController>(InstigatorPawn->GetController());
+		//if (PC && NewViewTarget)
+		//{
+		//	//UE_LOG(LogTemp, Warning, TEXT("TargetLocation = %s"), *CameraLocation->GetActorLocation().ToString());
+		//	PC->SetViewTargetWithBlend(NewViewTarget, 1.5f, EViewTargetBlendFunction::VTBlend_Cubic);
+		//}
+	}
+
+	AFPSGameState* GS = GetGameState<AFPSGameState>();
+	if (GS)
+	{
+		GS->MultiCastOnMissionComplite(InstigatorPawn, bMissionSuccess);
+		UE_LOG(LogTemp, Warning, TEXT("GameState Is not NULL"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameState Is NULL"));
 	}
 
 	OnMissionCompleted(InstigatorPawn, bMissionSuccess);
 
 }
+
+

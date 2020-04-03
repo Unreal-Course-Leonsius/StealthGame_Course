@@ -60,6 +60,7 @@ void AFPSExtractionZone::HandleOverlap(UPrimitiveComponent * OverlappedComponent
 		/// Some of that function returns UObject type but in case that static functions are singleton
 		/// it's return Object does not exists in Level
 		UGameplayStatics::PlaySound2D(this, ObjectiveMissingSOund);
+		UE_LOG(LogTemp, Warning, TEXT("Extraction Zone"));
 	}
 
 

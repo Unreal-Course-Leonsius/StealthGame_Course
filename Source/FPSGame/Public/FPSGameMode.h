@@ -22,12 +22,16 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
 	void OnMissionCompleted(APawn* InstigatorPawn, bool bMissionSuccess);
 
+public:
+
+	virtual void BeginPlay() override;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spectating")
 	TSubclassOf<AActor> BlueprintClass;
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Spactating")
+	/*UPROPERTY(EditDefaultsOnly, Category = "Spectator")
 	TSubclassOf<ATargetPoint> Location;*/
 
 private:

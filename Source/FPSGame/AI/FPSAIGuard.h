@@ -34,7 +34,10 @@ protected:
 
 	FRotator OriginalRotation;
 
+	UPROPERTY(ReplicatedUsing=OnRep_GuardState)
 	EAIState GuardState;
+	UFUNCTION()
+	void OnRep_GuardState();
 
 
 protected:
@@ -57,6 +60,8 @@ protected:
 	UFUNCTION()
 	void MoveNextPatrolPoint();
 
+	EAIState GetGuardState() { return GuardState; }
+
 protected:
 
 	/* Let the guard go on patrol */
@@ -73,8 +78,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+private:
+
+	FString GetEnumText(ENetRole role);
+	FString GetStateText(EAIState state);
 
 private:
 
