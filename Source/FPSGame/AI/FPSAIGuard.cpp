@@ -127,12 +127,14 @@ void AFPSAIGuard::OnPawnSeen(APawn * SeenPawn)
 	if (GM && SeenPawn->IsControlled())
 	{
 		GM->CompleteMission(SeenPawn, false);
-		SeenPawn->UnPossessed();
+		SeenPawn->UnPossessed(); // by it UnPossessed Guard have not seen again 
+		// there for CompleteMission() not call then one time 
+		// this means "Game Over" Widget not executed then one more time
 		
 	}
 
 	
-	FVector Direction = GetActorLocation() - SeenPawn->GetActorLocation();
+	FVector Direction = SeenPawn->GetActorLocation() - GetActorLocation();
 	Direction.Normalize();
 	FRotator NewLookAt = FRotationMatrix::MakeFromX(Direction).Rotator();
 	NewLookAt.Pitch = 0.f;

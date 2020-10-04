@@ -44,6 +44,8 @@ protected:
 public:
 	AFPSCharacter();
 
+public:
+
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category="Projectile")
 	TSubclassOf<AFPSProjectile> ProjectileClass;

@@ -34,10 +34,12 @@ protected:
 
 	FRotator OriginalRotation;
 
-	UPROPERTY(ReplicatedUsing=OnRep_GuardState)
+	UPROPERTY(ReplicatedUsing = OnRep_GuardState)
 	EAIState GuardState;
 	UFUNCTION()
 	void OnRep_GuardState();
+
+	
 
 
 protected:
